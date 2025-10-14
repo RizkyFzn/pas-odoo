@@ -14,7 +14,6 @@ class MaterialList(models.Model):
     state = fields.Selection([
         ('draft', 'Draft'),
         ('waiting_first_approval', 'Waiting First Approval'),
-        ('waiting_second_approval', 'Waiting Second Approval'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ], string='Status', default='draft', tracking=True)
@@ -24,7 +23,7 @@ class MaterialList(models.Model):
     note = fields.Text(string='Note')
     attachment = fields.Binary(string='Attachment')
     attachment_filename = fields.Char(string='Attachment Filename')
-    request_from = fields.Char(string='Request From')
+    request_from_id = fields.Many2one('stock.warehouse', string='Request From')
     product_line_ids = fields.One2many('material.list.line', 'request_id', string='Product Lines')
 
     @api.model
@@ -46,13 +45,8 @@ class MaterialList(models.Model):
         self.ensure_one()
         if self.state != 'waiting_first_approval':
             raise UserError("Hanya dokumen dalam status Waiting First Approval yang dapat disetujui pada tahap pertama.")
-        self.write({'state': 'waiting_second_approval'})
-
-    def action_second_approve(self):
-        self.ensure_one()
-        if self.state != 'waiting_second_approval':
-            raise UserError("Hanya dokumen dalam status Waiting Second Approval yang dapat disetujui pada tahap kedua.")
         self.write({'state': 'approved'})
+        return self.action_create_purchase_request()
 
     def action_reject(self):
         self.ensure_one()
@@ -80,7 +74,6 @@ class MaterialList(models.Model):
         }
 
         purchase_request = self.env['purchase.request'].create(purchase_request_vals)
-        self.write({'note': f"Purchase Request {purchase_request.name} created on {fields.Date.today()}"})
 
         return {
             'type': 'ir.actions.act_window',

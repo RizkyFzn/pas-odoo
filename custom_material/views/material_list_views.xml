@@ -7,10 +7,9 @@
             <form string="Material List">
                 <header>
                     <button name="action_submit_for_approval" string="Submit for Approval" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                    <button name="action_first_approve" string="First Approve" type="object" class="btn-primary" invisible="state != 'waiting_first_approval'"/>
-                    <button name="action_second_approve" string="Second Approve" type="object" class="btn-primary" invisible="state != 'waiting_second_approval'"/>
+                    <button name="action_first_approve" string="Approve" type="object" class="btn-primary" invisible="state != 'waiting_first_approval'"/>
                     <button name="action_reject" string="Reject" type="object" class="oe_highlight" invisible="state not in ('waiting_first_approval', 'waiting_second_approval')"/>
-                    <button name="action_create_purchase_request" string="Create Purchase Request" type="object" class="oe_highlight" invisible="state != 'approved'"/>
+                    <!-- <button name="action_create_purchase_request" string="Create Purchase Request" type="object" class="oe_highlight" invisible="state != 'approved'"/> -->
                     <field name="state" widget="statusbar" statusbar_visible="draft,waiting_first_approval,waiting_second_approval,approved,rejected" statusbar_colors='{"waiting_first_approval":"blue","waiting_second_approval":"blue","approved":"green","rejected":"red"}'/>
                 </header>
                 <sheet>
@@ -26,7 +25,7 @@
                             <field name="company_id"/>
                         </group>
                         <group>
-                            <field name="request_from"/>
+                            <field name="request_from_id"/>
                             <field name="attachment" filename="attachment_filename"/>
                             <field name="attachment_filename" invisible="1"/>
                             <field name="note"/>
@@ -60,7 +59,7 @@
                 <field name="request_by"/>
                 <field name="request_date"/>
                 <field name="company_id"/>
-                <field name="request_from"/>
+                <field name="request_from_id"/>
             </list>
         </field>
     </record>
