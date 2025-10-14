@@ -11,6 +11,13 @@ class MaterialList(models.Model):
         required=True, copy=False, readonly=False,
         index='trigram',
         default=lambda self: _('New'))
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('waiting_first_approval', 'Waiting First Approval'),
+        ('waiting_second_approval', 'Waiting Second Approval'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ], string='Status', default='draft', tracking=True)
     request_by = fields.Many2one('res.users', string='Request By', default=lambda self: self.env.user, required=True)
     request_date = fields.Date(string='Request Date', default=fields.Date.today, required=True)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True)
@@ -28,6 +35,30 @@ class MaterialList(models.Model):
                 raise UserError("Gagal menghasilkan nomor sequence untuk Material List. Pastikan sequence 'material.list' dikonfigurasi dengan benar.")
             vals['name'] = sequence
         return super(MaterialList, self).create(vals)
+    
+    def action_submit_for_approval(self):
+        self.ensure_one()
+        if self.state != 'draft':
+            raise UserError("Hanya dokumen dalam status Draft yang dapat dikirim untuk approval.")
+        self.write({'state': 'waiting_first_approval'})
+
+    def action_first_approve(self):
+        self.ensure_one()
+        if self.state != 'waiting_first_approval':
+            raise UserError("Hanya dokumen dalam status Waiting First Approval yang dapat disetujui pada tahap pertama.")
+        self.write({'state': 'waiting_second_approval'})
+
+    def action_second_approve(self):
+        self.ensure_one()
+        if self.state != 'waiting_second_approval':
+            raise UserError("Hanya dokumen dalam status Waiting Second Approval yang dapat disetujui pada tahap kedua.")
+        self.write({'state': 'approved'})
+
+    def action_reject(self):
+        self.ensure_one()
+        if self.state not in ['waiting_first_approval', 'waiting_second_approval']:
+            raise UserError("Hanya dokumen dalam status Waiting Approval yang dapat ditolak.")
+        self.write({'state': 'rejected'})
 
     def action_create_purchase_request(self):
         self.ensure_one()

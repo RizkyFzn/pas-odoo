@@ -6,7 +6,12 @@
         <field name="arch" type="xml">
             <form string="Material List">
                 <header>
-                    <button name="action_create_purchase_request" string="Create Purchase Request" type="object" class="btn-primary"/>
+                    <button name="action_submit_for_approval" string="Submit for Approval" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_first_approve" string="First Approve" type="object" class="btn-primary" invisible="state != 'waiting_first_approval'"/>
+                    <button name="action_second_approve" string="Second Approve" type="object" class="btn-primary" invisible="state != 'waiting_second_approval'"/>
+                    <button name="action_reject" string="Reject" type="object" class="oe_highlight" invisible="state not in ('waiting_first_approval', 'waiting_second_approval')"/>
+                    <button name="action_create_purchase_request" string="Create Purchase Request" type="object" class="oe_highlight" invisible="state != 'approved'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,waiting_first_approval,waiting_second_approval,approved,rejected" statusbar_colors='{"waiting_first_approval":"blue","waiting_second_approval":"blue","approved":"green","rejected":"red"}'/>
                 </header>
                 <sheet>
                     <div class="oe_title">
