@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_material_list_form" model="ir.ui.view">
+        <field name="name">material.list.form</field>
+        <field name="model">material.list</field>
+        <field name="arch" type="xml">
+            <form string="Material List">
+                <header>
+                    <button name="action_create_purchase_request" string="Create Purchase Request" type="object" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="request_by"/>
+                            <field name="request_date"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group>
+                            <field name="request_from"/>
+                            <field name="attachment" filename="attachment_filename"/>
+                            <field name="attachment_filename" invisible="1"/>
+                            <field name="note"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Product Lines">
+                            <field name="product_line_ids">
+                                <list editable="bottom">
+                                    <field name="product_id" widget="many2one" options="{'no_open': True}" domain="[('purchase_ok', '=', True)]"/>
+                                    <field name="description"/>
+                                    <field name="quantity_needed"/>
+                                    <field name="uom_id" widget="selection"/>
+                                    <field name="priority_level"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- list View -->
+    <record id="view_material_list_list" model="ir.ui.view">
+        <field name="name">material.list.list</field>
+        <field name="model">material.list</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="request_by"/>
+                <field name="request_date"/>
+                <field name="company_id"/>
+                <field name="request_from"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_material_list" model="ir.actions.act_window">
+        <field name="name">Material List</field>
+        <field name="res_model">material.list</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_material_list" name="Material List" parent="purchase_request.parent_menu_purchase_request" action="action_material_list" sequence="10"/>
+</odoo>
