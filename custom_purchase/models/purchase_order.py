@@ -12,23 +12,31 @@ class PurchaseOrder(models.Model):
         ('approve_mgmt3', 'Approve Management 3'),
     ], string='Status', readonly=True, index=True, copy=False, default='draft', track_visibility='onchange')
 
+    attachment_teknis = fields.Binary(string='Dokumen Teknis')
+    attachment_teknis_filename = fields.Char(string='Attachment Teknis Filename')
+    attachment_harga = fields.Binary(string='Dokumen Harga')
+    attachment_harga_filename = fields.Char(string='Attachment Harga Filename')
+    attachment_administrasi = fields.Binary(string='Dokumen Administrasi')
+    attachment_administrasi_filename = fields.Char(string='Attachment Administrasi Filename')
+    
+
     def button_validate_gm(self):
-        self.write({'state': 'validate_technical'})
+        self.write({'state': 'validate_gm'})
 
     def button_validate_technical(self):
-        self.write({'state': 'approve_mgmt1'})
+        self.write({'state': 'validate_technical'})
 
     def button_approve_mgmt1(self):
         if self.amount_total > 2000000:
-            self.write({'state': 'approve_mgmt2'})
+            self.write({'state': 'approve_mgmt1'})
         else:
-            self.write({'state': 'purchase'})
+            self.button_approve()
 
     def button_approve_mgmt2(self):
-        self.write({'state': 'approve_mgmt3'})
+        self.write({'state': 'approve_mgmt2'})
 
     def button_approve_mgmt3(self):
-        self.write({'state': 'purchase'})
+        self.button_approve()
 
     def button_approve(self):
         super(PurchaseOrder, self).button_approve()

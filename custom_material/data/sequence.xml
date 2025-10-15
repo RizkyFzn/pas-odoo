@@ -3,7 +3,7 @@
     <record id="sequence_material_list" model="ir.sequence">
         <field name="name">Material List Sequence</field>
         <field name="code">material.list</field>
-        <field name="prefix">ML/</field>
+        <field name="prefix">MR/</field>
         <field name="padding">5</field>
         <field name="company_id" eval="False"/>
     </record>

@@ -6,7 +6,6 @@
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-			<!-- invisible="state not in ('waiting_first_approval', 'waiting_second_approval')" -->
                 <button name="button_validate_gm" string="Validate GM Procurement" type="object" class="oe_highlight" invisible="state != 'draft'"/>
                 <button name="button_validate_technical" string="Validate Technical" type="object" class="oe_highlight" invisible="state != 'validate_gm'"/>
                 <button name="button_approve_mgmt1" string="Approve Management 1" type="object" class="oe_highlight" invisible="state != 'validate_technical'"/>
@@ -15,6 +14,18 @@
             </xpath>
             <xpath expr="//field[@name='state']" position="replace">
                 <field name="state" widget="statusbar" statusbar_visible="draft,validate_gm,validate_technical,approve_mgmt1,approve_mgmt2,approve_mgmt3,approved" readonly="1"/>
+            </xpath>
+			<xpath expr="//sheet/notebook" position="inside">
+                <page string="Attachment">
+                    <group>
+                        <field name="attachment_teknis" filename="attachment_teknis_filename"/>
+						<field name="attachment_teknis_filename" invisible="1"/>
+                        <field name="attachment_harga" filename="attachment_harga_filename"/>
+						<field name="attachment_harga_filename" invisible="1"/>
+                        <field name="attachment_administrasi" filename="attachment_administrasi_filename"/>
+						<field name="attachment_administrasi_filename" invisible="1"/>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>
