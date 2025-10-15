@@ -1,0 +1,54 @@
+<odoo>
+    <record id="view_kapal_master_list" model="ir.ui.view">
+        <field name="name">kapal.master.list</field>
+        <field name="model">kapal.master</field>
+        <field name="arch" type="xml">
+            <list string="Kapal">
+                <field name="vessel_code" widget="upper_case"/>
+                <field name="name" widget="upper_case"/>
+                <field name="type" widget="upper_case"/>
+                <field name="capacity"/>
+                <field name="status"/>
+                <field name="next_available_date"/>
+                <field name="pic_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kapal_master_form" model="ir.ui.view">
+        <field name="name">kapal.master.form</field>
+        <field name="model">kapal.master</field>
+        <field name="arch" type="xml">
+            <form string="Kapal">
+                <sheet>
+                    <group>
+                        <field name="vessel_code" widget="upper_case"/>
+                        <field name="name" widget="upper_case"/>
+                        <field name="type" widget="upper_case"/>
+                        <field name="capacity"/>
+                        <field name="status"/>
+                        <field name="next_available_date"/>
+                        <field name="pic_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_kapal_master" model="ir.actions.act_window">
+        <field name="name">Kapal</field>
+        <field name="res_model">kapal.master</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Master Data Kapal
+            </p>
+        </field>
+    </record>
+
+
+    <!-- menuitem -->
+    <menuitem id="menu_master_kapal" name="Master Kapal"
+              parent="sale.sale_menu_root" sequence="100"
+              action="action_kapal_master"/>
+</odoo>
