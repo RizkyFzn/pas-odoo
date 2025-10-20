@@ -1,16 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_kapal_master_list" model="ir.ui.view">
         <field name="name">kapal.master.list</field>
         <field name="model">kapal.master</field>
         <field name="arch" type="xml">
-            <list string="Kapal">
-                <field name="vessel_code" widget="upper_case"/>
-                <field name="name" widget="upper_case"/>
-                <field name="type" widget="upper_case"/>
-                <field name="capacity"/>
-                <field name="status"/>
-                <field name="next_available_date"/>
-                <field name="pic_id"/>
+            <list string="Master Kapal" decoration-success="category=='tugboat'" 
+                  decoration-warning="category=='barge'" 
+                  decoration-info="category=='general'">
+                <field name="name"/>
+                <field name="vessel_code"/>
+                <field name="category"/>
+                <field name="location_id" optional="hide"/>
+                <field name="engine_count"/>
+                <field name="hour_meter"/>
+                <field name="main_engine"/>
             </list>
         </field>
     </record>
@@ -19,36 +22,79 @@
         <field name="name">kapal.master.form</field>
         <field name="model">kapal.master</field>
         <field name="arch" type="xml">
-            <form string="Kapal">
+            <form string="Master Kapal">
                 <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Vessel Name"/> 
+                        </h1>
+                    </div>
                     <group>
-                        <field name="vessel_code" widget="upper_case"/>
-                        <field name="name" widget="upper_case"/>
-                        <field name="type" widget="upper_case"/>
-                        <field name="capacity"/>
-                        <field name="status"/>
-                        <field name="next_available_date"/>
-                        <field name="pic_id"/>
+                        <group>
+                            <field name="vessel_code" placeholder="Code"/>
+                            <field name="location_id" options="{'no_create': True}"/>
+                            <field name="category"/>
+                            <field name="hour_meter"/>
+                        </group>
+                        <group>
+                            <field name="engine_count"/>
+                            <field name="main_engine"/>
+                            <field name="aux_engine"/>
+                        </group>
                     </group>
+                    <notebook>
+                        <page string="Sparepart Lines">
+                            <field name="sparepart_line_ids">
+                                <list editable="bottom" 
+                                      decoration-success="status=='active'" 
+                                      decoration-muted="status=='inactive'">
+                                    <field name="product_id"/>
+                                    <field name="category_pn" readonly="1"/>
+                                    <field name="serial_number_id"/>
+                                    <field name="engine_type"/>
+                                    <field name="status" optional="hide"/>
+                                    <field name="installation_date"/>
+                                    <field name="hour_meter_install"/>
+                                    <field name="last_replacement_date"/>
+                                    <field name="note"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="product_id"/>
+                                            <field name="category_pn" readonly="1"/>
+                                            <field name="serial_number_id"/>
+                                            <field name="engine_type" />
+                                            <field name="status"/>
+                                        </group>
+                                        <group>
+                                            <field name="installation_date"/>
+                                            <field name="hour_meter_install"/>
+                                            <field name="last_replacement_date"/>
+                                            <field name="note"/>
+                                        </group>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
     </record>
-    
+
     <record id="action_kapal_master" model="ir.actions.act_window">
         <field name="name">Kapal</field>
         <field name="res_model">kapal.master</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Master Data Kapal
-            </p>
+            <p class="o_view_nocontent_smiling_face">Master Data Kapal</p>
         </field>
     </record>
 
-
-    <!-- menuitem -->
-    <menuitem id="menu_master_kapal" name="Master Kapal"
-              parent="sale.sale_menu_root" sequence="100"
+    <menuitem id="menu_master_kapal" 
+              name="Master Kapal"
+              parent="sale.sale_menu_root" 
+              sequence="100"
               action="action_kapal_master"/>
 </odoo>

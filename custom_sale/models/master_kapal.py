@@ -1,23 +1,34 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 class KapalMaster(models.Model):
     _name = 'kapal.master'
     _description = 'Master Data Kapal'
 
-    vessel_code = fields.Char(string='Vessel Code', required=True)
     name = fields.Char(string='Vessel Name', required=True)
-    type = fields.Selection([
+    vessel_code = fields.Char(string='Vessel Code', required=True)
+    location_id = fields.Many2one(
+        'stock.warehouse', 
+        string='Location',
+    )
+    category = fields.Selection([
         ('barge', 'Barge'),
         ('tugboat', 'Tugboat'),
-        ('mother', 'Mother Vessel'),
-        ('crane', 'Floating Crane'),
-    ], string='Type')
-    capacity = fields.Float('Capacity (MT)')
-    status = fields.Selection([
-        ('available', 'Available'),
-        ('booked', 'Booked'),
-        ('maintenance', 'Maintenance'),
-        ('out', 'Out of Service'),
-    ], string='Status')
-    next_available_date = fields.Date('Next Available Date')
-    pic_id = fields.Many2one('res.partner', string='PIC')
+        ('general', 'General Vessel Cargo'),
+    ], string='Category', required=True)
+    hour_meter = fields.Char('Hour Meter')
+    engine_count = fields.Integer('Engine Count', default=1)
+    main_engine = fields.Char('Main Engine')
+    aux_engine = fields.Char('Aux Engine')
+
+    sparepart_line_ids = fields.One2many(
+        'kapal.master.line', 
+        'kapal_master_id',
+        string='Sparepart Line'
+    )
+    
+    def name_get(self):
+        result = []
+        for record in self:
+            name = f"{record.name} ({record.vessel_code})"
+            result.append((record.id, name))
+        return result

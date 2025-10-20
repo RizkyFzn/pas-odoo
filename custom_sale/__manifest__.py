@@ -11,7 +11,7 @@
 
     'category': 'Sales/Sales',
     'version': '18.0.0.0',
-    'depends': ['base'],
+    'depends': ['base', 'stock'],
 
     'data': [
         # 'security/security.xml',
