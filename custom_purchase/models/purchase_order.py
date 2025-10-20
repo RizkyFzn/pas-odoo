@@ -39,4 +39,4 @@ class PurchaseOrder(models.Model):
         self.button_approve()
 
     def button_approve(self):
-        super(PurchaseOrder, self).button_approve()
+        super(PurchaseOrder, self).button_confirm()
