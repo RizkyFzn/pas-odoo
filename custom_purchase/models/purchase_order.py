@@ -1,6 +1,9 @@
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
+import logging
+_logger = logging.getLogger(__name__)
+
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
@@ -30,13 +33,29 @@ class PurchaseOrder(models.Model):
         if self.amount_total > 2000000:
             self.write({'state': 'approve_mgmt1'})
         else:
-            self.button_approve()
+            _logger.info(f"Amount total is less than 2 million: {self.amount_total}")
+            self.button_approve_po()
 
     def button_approve_mgmt2(self):
         self.write({'state': 'approve_mgmt2'})
 
     def button_approve_mgmt3(self):
-        self.button_approve()
+        self.button_approve_po()
 
-    def button_approve(self):
-        super(PurchaseOrder, self).button_confirm()
+    def button_approve_po(self):
+        # _logger.info(f"Approve dijalankan")
+        # super(PurchaseOrder, self).button_approve()
+        # super(PurchaseOrder, self).button_confirm()
+        for order in self:
+            # if order.state not in ['draft', 'sent']:
+            #     continue
+            order.order_line._validate_analytic_distribution()
+            order._add_supplier_to_product()
+            # Deal with double validation process
+            if order._approval_allowed():
+                order.button_approve()
+            else:
+                order.write({'state': 'to approve'})
+            if order.partner_id not in order.message_partner_ids:
+                order.message_subscribe([order.partner_id.id])
+        return True
