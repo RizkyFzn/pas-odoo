@@ -33,7 +33,7 @@ class PurchaseOrder(models.Model):
         if self.amount_total > 2000000:
             self.write({'state': 'approve_mgmt1'})
         else:
-            _logger.info(f"Amount total is less than 2 million: {self.amount_total}")
+            # _logger.info(f"Amount total is less than 2 million: {self.amount_total}")
             self.button_approve_po()
 
     def button_approve_mgmt2(self):
@@ -43,10 +43,10 @@ class PurchaseOrder(models.Model):
         self.button_approve_po()
 
     def button_approve_po(self):
-        # _logger.info(f"Approve dijalankan")
-        # super(PurchaseOrder, self).button_approve()
-        # super(PurchaseOrder, self).button_confirm()
         for order in self:
+            if order.supplier_line and not order.has_winner:
+                raise UserError('Choose a supplier as the winner first!')
+            
             # if order.state not in ['draft', 'sent']:
             #     continue
             order.order_line._validate_analytic_distribution()
