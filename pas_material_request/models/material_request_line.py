@@ -51,7 +51,7 @@ class MaterialRequestLine(models.Model):
     
     last_purchase_date = fields.Date(
         string='Tgl Pembelian Terakhir',
-        compute='_compute_last_purchase_date',
+        # compute='_compute_last_purchase_date',
         store=True,
         help="Tanggal pembelian terakhir dari PO untuk produk ini"
     )
