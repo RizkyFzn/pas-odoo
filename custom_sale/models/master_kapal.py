@@ -20,6 +20,15 @@ class KapalMaster(models.Model):
     main_engine = fields.Char('Main Engine')
     aux_engine = fields.Char('Aux Engine')
 
+    destination_id = fields.Many2one(
+        comodel_name="stock.warehouse",
+        required=True,
+        tracking=True,
+        index=True,
+        string="Destination WH",
+        check_company=True,
+    )
+
     sparepart_line_ids = fields.One2many(
         'kapal.master.line', 
         'kapal_master_id',

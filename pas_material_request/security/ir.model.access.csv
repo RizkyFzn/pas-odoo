@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_apm_material_request_user,apm.material.request,model_apm_material_request,apm_material_request.group_apm_material_request_user,1,1,1,1
+access_apm_material_request_line_user,apm.material.request.line,model_apm_material_request_line,apm_material_request.group_apm_material_request_user,1,1,1,1
