@@ -24,6 +24,9 @@ class PurchaseOrder(models.Model):
     
 
     def button_validate_gm(self):
+        for order in self:
+            if order.supplier_line and not order.has_winner:
+                raise UserError('Choose a supplier as the winner first!')
         self.write({'state': 'validate_gm'})
 
     def button_validate_technical(self):
