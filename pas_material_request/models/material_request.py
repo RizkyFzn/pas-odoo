@@ -259,19 +259,27 @@ class MaterialRequest(models.Model):
         for record in self:
             insufficient_lines = record.env['apm.material.request.line']
             total_shortage = 0.0
-            
+
             for line in record.line_ids.filtered(lambda l: l.product_uom_qty > 0):
-                # GET AVAILABLE STOCK
-                available_qty = line.product_id.with_context({
-                    'warehouse': record.request_warehouse_id.id,
-                    'location': record.location_id.id if record.location_id else False,
-                }).qty_available
-                
+                # GET AVAILABLE STOCK - Use consistent warehouse context
+                # Prioritize warehouse over location for consistent stock checking
+                stock_context = {'warehouse': record.request_warehouse_id.id}
+
+                # Only add location context if location_id is properly set and valid
+                if record.location_id:
+                    try:
+                        stock_context['location'] = record.location_id.id
+                    except:
+                        # If location_id is invalid, don't use it
+                        pass
+
+                available_qty = line.product_id.with_context(stock_context).qty_available
+
                 if line.product_uom_qty > available_qty:
                     shortage = line.product_uom_qty - available_qty
                     total_shortage += shortage
                     insufficient_lines |= line
-            
+
             record.has_insufficient_stock = bool(insufficient_lines)
             record.insufficient_stock_qty = total_shortage
             
@@ -513,15 +521,37 @@ class MaterialRequest(models.Model):
         for record in self:
             if not record.department_id:
                 raise UserError(_("Department wajib diisi sebelum mengajukan approval."))
-            
+
             if not record.purchase_type:
                 raise UserError(_("Jenis Pembelian wajib diisi sebelum mengajukan approval."))
-        
+
         # Original logic
         for record in self:
             if record.name == _("New"):
                 record.name = self.env['ir.sequence'].next_by_code('apm.material.request') or _("New")
-        
+
+        # Ensure stock computation is consistent before approval
+        _logger.info(f"=== BUTTON TO APPROVE: {record.name} ===")
+        _logger.info(f"Warehouse: {record.request_warehouse_id.name} (ID: {record.request_warehouse_id.id})")
+        _logger.info(f"Location: {record.location_id.name if record.location_id else 'None'} (ID: {record.location_id.id if record.location_id else 'None'})")
+
+        # Force recompute of insufficient stock before approval
+        for record in self:
+            # Trigger recompute of insufficient stock with current context
+            record._compute_insufficient_stock()
+
+            # Log stock status for debugging
+            for line in record.line_ids.filtered(lambda l: l.product_uom_qty > 0):
+                stock_context = {'warehouse': record.request_warehouse_id.id}
+                if record.location_id:
+                    try:
+                        stock_context['location'] = record.location_id.id
+                    except:
+                        pass
+
+                available_qty = line.product_id.with_context(stock_context).qty_available
+                _logger.info(f"Line {line.product_id.name}: Demand={line.product_uom_qty}, Available={available_qty}")
+
         self.write({"state": "to_approve"})
                 
     def _search_stock_picking(self, operator, value):
@@ -622,31 +652,32 @@ class MaterialRequest(models.Model):
 
     def _create_auto_purchase_request(self):
         """Create PR untuk insufficient stock lines"""
-        insufficient_lines = self.line_ids.filtered(lambda l: l.product_uom_qty > 0 and 
-                                                l.product_uom_qty > l.product_id.with_context(
-                                                    warehouse=self.request_warehouse_id.id,
-                                                    location=self.location_id.id
-                                                ).qty_available)
-        
+        # Use consistent stock checking logic
+        stock_context = {'warehouse': self.request_warehouse_id.id}
+        if self.location_id:
+            try:
+                stock_context['location'] = self.location_id.id
+            except:
+                pass
+
+        insufficient_lines = self.line_ids.filtered(lambda l: l.product_uom_qty > 0 and
+                                                l.product_uom_qty > l.product_id.with_context(stock_context).qty_available)
+
         if not insufficient_lines:
             return False
-        
+
         # CREATE PURCHASE REQUEST
         purchase_request = self.env['purchase.request'].create({
             'material_request_id': self.id,
             'date_start': fields.Datetime.now(),
         })
-        
+
         # CREATE PURCHASE LINES
         purchase_lines = []
         for line in insufficient_lines:
-            available_qty = line.product_id.with_context(
-                warehouse=self.request_warehouse_id.id,
-                location=self.location_id.id
-            ).qty_available
-            
+            available_qty = line.product_id.with_context(stock_context).qty_available
             shortage_qty = line.product_uom_qty - available_qty
-            
+
             purchase_lines.append(Command.create({
                 'product_id': line.product_id.id,
                 'product_uom_id': line.product_uom_id.id,
@@ -654,20 +685,20 @@ class MaterialRequest(models.Model):
                 'material_request_line_id': line.id,
                 'description': f"Shortage MR {self.name}: {line.name or line.product_id.name}",
             }))
-        
+
         purchase_request.write({'line_ids': purchase_lines})
         self.purchase_request_id = purchase_request.id
-        
+
         # AUTO SUBMIT
         purchase_request.button_to_approve()
-        
+
         # POST MESSAGE
         self.message_post(
             body=f"Purchase Request <b>{purchase_request.name}</b> created untuk {len(insufficient_lines)} items:<br/>{', '.join(purchase_request.line_ids.mapped('product_id.name'))}",
             message_type='notification',
             subtype_xmlid='mail.mt_comment'
         )
-        
+
         return purchase_request
 
     def button_rejected(self):
