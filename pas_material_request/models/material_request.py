@@ -275,6 +275,10 @@ class MaterialRequest(models.Model):
 
                 available_qty = line.product_id.with_context(stock_context).qty_available
 
+                # Debug logging for troubleshooting
+                if record.state in ['to_approve', 'approved']:
+                    _logger.info(f"Stock Check - Product: {line.product_id.name}, Demand: {line.product_uom_qty}, Available: {available_qty}, Context: {stock_context}")
+
                 if line.product_uom_qty > available_qty:
                     shortage = line.product_uom_qty - available_qty
                     total_shortage += shortage

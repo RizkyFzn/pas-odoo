@@ -202,29 +202,23 @@ class MaterialRequestLine(models.Model):
                 # Safety check untuk location_id dan location_dest_id
                 source_wh_id = False
                 dest_wh_id = False
-                
+
                 if request.request_id.location_id:
                     source_wh_id = request.request_id.location_id.warehouse_id.id
                 elif request.request_id.request_warehouse_id:
                     source_wh_id = request.request_id.request_warehouse_id.id
-                
+
                 if request.request_id.location_dest_id:
                     dest_wh_id = request.request_id.location_dest_id.warehouse_id.id
                 elif request.request_id.destination_id:
                     dest_wh_id = request.request_id.destination_id.id
-                
+
                 warehouse_id = dest_wh_id if incoming else source_wh_id
-                
-                # Safety check untuk date_to
+
+                # Use current date for consistent stock calculation
+                # Don't use future dates (date_to) as it causes inconsistent stock levels
                 return_date = now
-                if request.request_id.date_to:
-                    try:
-                        return_date = fields.Datetime.from_string(request.request_id.date_to)
-                    except:
-                        return_date = now
-                else:
-                    return_date = now
-                
+
                 return (warehouse_id or False, return_date)
             except Exception:
                 return (False, now)
@@ -237,14 +231,15 @@ class MaterialRequestLine(models.Model):
             # Skip jika request_id tidak valid
             if not line.request_id:
                 continue
-                
+
             # Cek apakah ini consuming (outgoing move)
             is_consuming = line._is_consuming()
-            
-            if is_consuming and line.request_id.state == 'draft':
+
+            # Use consistent logic regardless of state for stock checking
+            if is_consuming:
                 key = safe_key_virtual_available(line)
                 prefetch_virtual_available[key].add(line.product_id.id)
-            
+
             # Untuk incoming moves (optional)
             elif line.request_id.picking_type_id and line.request_id.picking_type_id.code == 'incoming':
                 key = safe_key_virtual_available(line, incoming=True)
@@ -283,10 +278,15 @@ class MaterialRequestLine(models.Model):
                     virtual_available = virtual_available_dict.get(key, {}).get(line.product_id.id, 0.0)
                     line.forecast_availability = virtual_available - line.product_uom_qty
                 else:
-                    # Default untuk non-consuming: gunakan current stock
-                    line.forecast_availability = line.product_id.with_context(
-                        warehouse=line.request_id.request_warehouse_id.id if line.request_id.request_warehouse_id else False
-                    ).virtual_available - line.product_uom_qty
+                    # Default untuk non-consuming: gunakan current stock dengan konsisten context
+                    stock_context = {'warehouse': line.request_id.request_warehouse_id.id} if line.request_id.request_warehouse_id else {}
+                    if line.request_id.location_id:
+                        try:
+                            stock_context['location'] = line.request_id.location_id.id
+                        except:
+                            pass
+
+                    line.forecast_availability = line.product_id.with_context(stock_context).virtual_available - line.product_uom_qty
                     
             except Exception as e:
                 _logger.warning(f"Error computing forecast for line {line.id}: {e}")
