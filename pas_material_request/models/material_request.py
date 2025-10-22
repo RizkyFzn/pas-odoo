@@ -303,7 +303,7 @@ class MaterialRequest(models.Model):
             record.request_summary = ' → '.join(summary_parts) if summary_parts else ''
     
     # ✅ FIXED: _compute_picking_information dengan FALLBACK
-    @api.depends('request_warehouse_id', 'request_type', 'destination_id')
+    @api.depends('request_warehouse_id', 'request_type', 'destination_id', 'vessel_id')
     def _compute_picking_information(self):
         for record in self:
             if record.state == 'done':
@@ -318,7 +318,7 @@ class MaterialRequest(models.Model):
             # ✅ LOCATIONS DENGAN FALLBACK
             if record.picking_type_id:
                 record.location_id = record.picking_type_id.default_location_src_id.id
-                record.location_dest_id = record.picking_type_id.default_location_dest_id.id
+                # record.location_dest_id = record.picking_type_id.default_location_dest_id.id
             else:
                 # FALLBACK: Gunakan warehouse stock locations
                 source_wh = record.request_warehouse_id
@@ -334,7 +334,12 @@ class MaterialRequest(models.Model):
                     ], limit=1)
                 
                 record.location_id = source_loc.id
-                record.location_dest_id = dest_loc.id
+                # record.location_dest_id = dest_loc.id
+            
+            if record.vessel_id and record.vessel_id.location_id:
+                record.location_dest_id = record.vessel_id.location_id
+            elif record.destination_id:
+                record.location_dest_id = record.destination_id.lot_stock_id
     
     def _search_picking_type(self, warehouse):
         """✅ FIXED: Proper picking type search"""

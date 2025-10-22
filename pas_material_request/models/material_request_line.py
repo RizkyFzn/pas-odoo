@@ -72,7 +72,7 @@ class MaterialRequestLine(models.Model):
     product_id = fields.Many2one(
         'product.product', 'Product',
         check_company=True,
-        domain="[('type', '=', 'consu'), ('qty_available', '>=', 1)]", index=True, required=True)
+        domain="[('type', '=', 'consu')]", index=True, required=True)
     product_uom_qty = fields.Float(
         'Demand',
         digits='Product Unit of Measure',
