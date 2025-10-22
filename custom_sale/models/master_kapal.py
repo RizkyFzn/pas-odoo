@@ -49,9 +49,8 @@ class KapalMaster(models.Model):
                 raise UserError("Vessel code harus diisi terlebih dahulu.")
 
             # Generate location name
-            vessel_code = record.destination_id.code.strip()
             vessel_name = record.name.strip()
-            location_name = f"{vessel_code}/{vessel_name}"
+            location_name = f"{vessel_name}"
 
             # Check if location already exists
             existing_location = self.env['stock.location'].search([
@@ -80,7 +79,7 @@ class KapalMaster(models.Model):
                     'name': location_name,
                     'usage': 'internal',
                     'company_id': record.destination_id.company_id.id,
-                    # 'location_id': record.destination_id.view_location_id.id,
+                    'location_id': record.destination_id.view_location_id.id,
                 })
 
                 record.location_id = new_location.id
