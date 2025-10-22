@@ -23,6 +23,13 @@
         <field name="model">kapal.master</field>
         <field name="arch" type="xml">
             <form string="Master Kapal">
+                <header>
+                    <button name="action_generate_location"
+                            type="object"
+                            string="Generate Location"
+                            class="btn-primary"
+                            help="Generate stock location dari kombinasi destination code dan vessel name"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
