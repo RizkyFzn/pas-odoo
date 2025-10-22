@@ -26,7 +26,7 @@ class KapalMaster(models.Model):
         required=True,
         tracking=True,
         index=True,
-        string="Destination WH",
+        string="Warehouse",
         check_company=True,
     )
 
