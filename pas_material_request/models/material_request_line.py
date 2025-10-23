@@ -51,7 +51,7 @@ class MaterialRequestLine(models.Model):
     
     last_purchase_date = fields.Date(
         string='Tgl Pembelian Terakhir',
-        # compute='_compute_last_purchase_date',
+        compute='_compute_last_purchase_date',
         store=True,
         help="Tanggal pembelian terakhir dari PO untuk produk ini"
     )
@@ -100,23 +100,23 @@ class MaterialRequestLine(models.Model):
     #         self._compute_last_purchase_date()
     
     # === COMPUTE METHODS ===
-    # @api.depends('product_id')
-    # def _compute_last_purchase_date(self):
-    #     """Ambil tanggal PO terakhir untuk product ini"""
-    #     for line in self:
-    #         if not line.product_id:
-    #             line.last_purchase_date = False
-    #             continue
+    @api.depends('product_id')
+    def _compute_last_purchase_date(self):
+        """Ambil tanggal PO terakhir untuk product ini"""
+        for line in self:
+            if not line.product_id:
+                line.last_purchase_date = False
+                continue
             
-    #         last_po_line = self.env['purchase.order.line'].search([
-    #             ('product_id', '=', line.product_id.id),
-    #             ('order_id.state', 'in', ['purchase', 'done']),
-    #         ], order='order_id.date_order desc', limit=1)
+            last_po = self.env['purchase.order'].search([
+                ('state', 'in', ['purchase', 'done']),
+                ('order_line.product_id', '=', line.product_id.id),
+            ], order='date_order desc', limit=1)
             
-    #         if last_po_line:
-    #             line.last_purchase_date = last_po_line.order_id.date_order.date()
-    #         else:
-    #             line.last_purchase_date = False
+            if last_po:
+                line.last_purchase_date = last_po.date_order.date()
+            else:
+                line.last_purchase_date = False
     
     # === VALIDATION ===
     @api.constrains('interval_hour')
@@ -142,9 +142,9 @@ class MaterialRequestLine(models.Model):
             parts.append(f"Int:{self.interval_hour}h")
         
         # Tambahkan machine side
-        if self.for_machine_side:
-            side_label = dict(self._fields['for_machine_side'].selection).get(self.for_machine_side)
-            parts.append(f"Side:{side_label}")
+        # if self.for_machine_side:
+        #     side_label = dict(self._fields['for_machine_side'].selection).get(self.for_machine_side)
+        #     parts.append(f"Side:{side_label}")
         
         # Tambahkan last purchase date
         if self.last_purchase_date:
