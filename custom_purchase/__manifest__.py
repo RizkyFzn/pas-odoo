@@ -16,13 +16,14 @@
     'category': 'Uncategorized',
     'version': '0.1',
 
-    'depends': ['purchase_requisition', 'purchase_request'],
+    'depends': ['purchase_requisition', 'purchase_request', 'bag_purchase'],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
 
         'views/purchase_order_views.xml',
+        'views/supplier_line_views.xml',
         
     ],
 }

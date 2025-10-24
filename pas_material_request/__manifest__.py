@@ -19,6 +19,7 @@
         'data/sequence_data.xml',
         'views/material_request_views.xml',
         'views/stock_picking_views.xml',
+        'views/purchase_request_line_views.xml',
     ],
     
     'license': 'OPL-1'

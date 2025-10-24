@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Inherit from bag_purchase supplier_line views -->
+  <record id="supplier_line_view_tree" model="ir.ui.view">
+    <field name="name">supplier.line.view.tree</field>
+    <field name="model">supplier.line</field>
+    <field name="inherit_id" ref="bag_purchase.supplier_line_view_tree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='state']" position="attributes">
+        <attribute name="decoration-warning">state == 'to_approve'</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_winner']" position="attributes">
+        <attribute name="invisible">has_winner or state_po == 'purchase' or state == 'to_approve'</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_winner']" position="after">
+        <button string="Approve" name="action_approve" type="object" class="oe_highlight" icon="fa-check" invisible="state != 'to_approve'"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="supplier_line_view_form" model="ir.ui.view">
+    <field name="name">supplier.line.view.form</field>
+    <field name="model">supplier.line</field>
+    <field name="inherit_id" ref="bag_purchase.supplier_line_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='state']" position="attributes">
+        <attribute name="statusbar_visible">winner,to_approve,participant</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_winner']" position="attributes">
+        <attribute name="invisible">has_winner or state_po == 'purchase' or state == 'to_approve'</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_winner']" position="after">
+        <button string="Approve" name="action_approve" type="object" class="oe_highlight" icon="fa-check" invisible="state != 'to_approve'" confirm="Approve this supplier as winner?"/>
+      </xpath>
+      <xpath expr="//widget[@name='web_ribbon']" position="after">
+        <widget name="web_ribbon" title="To Approve" bg_color="bg-warning" invisible="state != 'to_approve'"/>
+      </xpath>
+      <xpath expr="//field[@name='supplier_id']" position="attributes">
+        <attribute name="readonly">state == 'winner' or state == 'to_approve'</attribute>
+      </xpath>
+      <xpath expr="//field[@name='address']" position="attributes">
+        <attribute name="readonly">state == 'winner' or state == 'to_approve'</attribute>
+      </xpath>
+      <xpath expr="//field[@name='quotation_date']" position="attributes">
+        <attribute name="readonly">state == 'winner' or state == 'to_approve'</attribute>
+      </xpath>
+      <xpath expr="//field[@name='valid_date']" position="attributes">
+        <attribute name="readonly">state == 'winner' or state == 'to_approve'</attribute>
+      </xpath>
+      <xpath expr="//field[@name='supplier_product_line']" position="attributes">
+        <attribute name="readonly">state == 'winner' or state == 'to_approve' or has_winner or state_po == 'purchase'</attribute>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

@@ -85,7 +85,7 @@
                     
                     <notebook>
                         <page string="Products">
-                            <field name="line_ids" readonly="is_editable">
+                            <field name="line_ids">
                                 <list editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="product_id" domain="[('qty_available', '&gt;=', 1)]"/>
@@ -95,7 +95,7 @@
                                     
                                     <field name="engine_type" width="100"/>
                                     <field name="interval_hour" width="80"/>
-                                    <field name="for_machine_side" width="80" widget="badge"/>
+                                    <field name="for_machine_side" width="80" readonly="0"/>
                                     <field name="last_purchase_date" width="100"/>
                                     
                                     <field name="product_uom_category_id" column_invisible="1"/>
@@ -118,7 +118,7 @@
                                                 <!-- ENGINE GROUP -->
                                                 <field name="engine_type"/>
                                                 <field name="interval_hour"/>
-                                                <field name="for_machine_side"/>
+                                                <field name="for_machine_side" readonly="0"/>
                                                 <field name="last_purchase_date" readonly="1"/>
                                             </group>
                                         </group>

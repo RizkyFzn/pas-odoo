@@ -33,17 +33,17 @@ class PurchaseOrder(models.Model):
         self.write({'state': 'validate_technical'})
 
     def button_approve_mgmt1(self):
-        if self.amount_total > 2000000:
-            self.write({'state': 'approve_mgmt1'})
-        else:
-            # _logger.info(f"Amount total is less than 2 million: {self.amount_total}")
-            self.button_approve_po()
+        self.write({'state': 'approve_mgmt1'})
 
     def button_approve_mgmt2(self):
-        self.write({'state': 'approve_mgmt2'})
+        if self.amount_total > 2000000:
+            self.write({'state': 'approve_mgmt2'})
+        else:
+            self.button_approve_po()
 
     def button_approve_mgmt3(self):
-        self.button_approve_po()
+        if self.amount_total > 2000000:
+            self.button_approve_po()
 
     def button_approve_po(self):
         for order in self:
